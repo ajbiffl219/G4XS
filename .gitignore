@@ -1,0 +1,15 @@
+build/
+__pycache__/
+*.log
+*.root
+*.py[cod]
+
+*.so
+
+Makefile
+CMakeFiles/
+CMakeCache.txt
+
+.vscode/
+.Python
+.ipynb_checkpoints

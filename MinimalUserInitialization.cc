@@ -1,0 +1,114 @@
+#include "MinimalUserInitialization.hh"
+
+#include "G4Neutron.hh"
+#include "G4NistManager.hh"
+#include "G4PhysicsListHelper.hh"
+
+#include "G4HadronElasticProcess.hh"
+#include "G4HadronInelasticProcess.hh"
+#include "G4HadronCaptureProcess.hh"
+#include "G4HadronFissionProcess.hh"
+
+//#include "G4NeutronBuilder.hh"
+#include "G4ProcessManager.hh"
+#include "G4ProcessVector.hh"
+
+#include "G4ThreeVector.hh"
+
+#include "G4Box.hh"
+#include "G4LogicalVolume.hh"
+#include "G4PVPlacement.hh"
+
+
+#include "G4ParticleHPCaptureData.hh"
+#include "G4ParticleHPElasticData.hh"
+#include "G4ParticleHPFissionData.hh"
+#include "G4ParticleHPInelasticData.hh"
+
+
+NeutronPhysicsList::NeutronPhysicsList() : G4VModularPhysicsList() {;}
+
+
+void NeutronPhysicsList::ConstructHadronics() {
+    
+    G4PhysicsListHelper *ph = G4PhysicsListHelper::GetPhysicsListHelper();
+
+    G4ParticleDefinition *theNeutron = G4Neutron::Definition();
+
+    ph->RegisterProcess(new G4HadronElasticProcess(), theNeutron);
+    ph->RegisterProcess(new G4HadronInelasticProcess("NeutronInelastic", theNeutron), theNeutron);
+    ph->RegisterProcess(new G4HadronCaptureProcess(), theNeutron);
+    ph->RegisterProcess(new G4HadronFissionProcess(), theNeutron);
+
+    //G4NeutronBuilder *theNeutrons = new G4NeutronBuilder;
+    //theNeutrons->RegisterMe(theHPNeutron = new G4NeutronBuilder);
+    //theNeutrons->Build();
+
+    //NeutronHPJENDLHEInelastic=new G4NeutronHPJENDLHEInelasticData;
+    //FindInelasticProcess(theNeutron)->AddDataSet(NeutronHPJENDLHEInelastic);
+
+    G4ProcessVector *procs = theNeutron->GetProcessManager()->GetProcessList();
+    /*for (size_t i = 0; i < nProcs; ++i) {
+        if (fHadronInelastic == ((*procs)[i])->GetProcessSubType()) {
+            ((*procs)[i])->AddDataSet(NeutronHPJENDLHEInelastic);
+        }
+    }*/
+    /*for (size_t i = 0; i < procs->size(); ++i) {
+        G4String procName = (*procs)[i]->GetProcessName();
+        G4String procType = G4VProcess::GetProcessTypeName((*procs)[i]->GetProcessType());
+
+        std::cout << "Process " << i << " : " << " name = " << procName << ", type = " << procType << std::endl;
+
+        (*procs)[i]->DumpInfo();
+        (*procs)[i]->ProcessDescription(std::cout);
+    }*/
+    static_cast<G4HadronicProcess*>((*procs)[1])->AddDataSet(new G4ParticleHPElasticData);
+    static_cast<G4HadronicProcess*>((*procs)[2])->AddDataSet(new G4ParticleHPInelasticData);
+    static_cast<G4HadronicProcess*>((*procs)[3])->AddDataSet(new G4ParticleHPCaptureData);
+    static_cast<G4HadronicProcess*>((*procs)[4])->AddDataSet(new G4ParticleHPFissionData);
+
+
+
+    //G4cout << "NeutronPhysicsList::ConstructHadronics()" << G4endl;
+}
+
+
+
+
+void NeutronPhysicsList::ConstructProcess() {
+    AddTransportation();
+    ConstructHadronics();
+}
+
+
+void NeutronPhysicsList::ConstructParticle() {
+    G4Neutron::NeutronDefinition();
+}
+
+
+MinimalDetector::MinimalDetector() : G4VUserDetectorConstruction() {;}
+
+G4VPhysicalVolume* MinimalDetector::Construct() {
+    G4Material *galactic = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
+    G4Box *worldBox = new G4Box("WorldBox", 1.,1.,1.);
+    return new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), new G4LogicalVolume(worldBox, galactic, "World"), "World", nullptr, false, 0, false);
+}
+
+
+
+MinimalInitialization::MinimalInitialization() : G4VUserActionInitialization() {;}
+
+void MinimalInitialization::Build() const {
+    SetUserAction(new MinimalPrimaryGenerator());
+}
+
+
+MinimalPrimaryGenerator::MinimalPrimaryGenerator() : G4VUserPrimaryGeneratorAction() {;}
+
+
+
+void MinimalPrimaryGenerator::GeneratePrimaries(G4Event *anEvent) {
+    return;
+}
+
+
