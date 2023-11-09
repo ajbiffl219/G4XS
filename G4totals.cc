@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <iomanip>
 
 
 #include "G4RunManager.hh"
@@ -41,11 +42,8 @@ int main() {
     G4cout << "sequential mode" << G4endl;
 #endif
 
-    G4VModularPhysicsList *phys = new NeutronPhysicsList();
-    MinimalDetector *det = new MinimalDetector;
-
-    runManager->SetUserInitialization(phys);
-    runManager->SetUserInitialization(det);
+    runManager->SetUserInitialization(new NeutronPhysicsList);
+    runManager->SetUserInitialization(new MinimalDetector);
     runManager->SetUserInitialization(new MinimalInitialization);
 
 
@@ -55,12 +53,10 @@ int main() {
     G4NistManager *nist = G4NistManager::Instance();
     G4Material *material = nist->FindOrBuildMaterial("G4_Si");
 
-    G4ParticleHPElastic *elastic = new G4ParticleHPElastic;
-    elastic->BuildPhysicsTable(*theNeutron);
-    G4cout << "3 Built G4ParticleHPElastic physics table" << G4endl;
+    //G4ParticleHPElastic *elastic = new G4ParticleHPElastic;
+    //elastic->BuildPhysicsTable(*theNeutron);
     
     runManager->Initialize();
-    G4cout << "2.3 initialized" << G4endl;
 
     G4ProcessManager *theMan = theNeutron->GetProcessManager();
     G4ProcessVector *procList = theMan->GetProcessList();
@@ -71,10 +67,22 @@ int main() {
 
     G4DynamicParticle *dynamicNeutron = new G4DynamicParticle(theNeutron, G4ThreeVector(0.,0.,1.), 0.);
 
-    //G4double e = 50;
+    //dynamicNeutron->SetKineticEnergy(50.*keV);
+    //G4cout << "Cross section for 50 keV neutron with Si = " << cm*elasticDataStore->GetCrossSection(dynamicNeutron, material) << " cm^-1" << G4endl;
 
-    //dynamicNeutron->SetKineticEnergy(e*keV);
-    //G4cout << "Cross section for " << e << " keV neutron with Si = " << cm*elasticDataStore->GetCrossSection(dynamicNeutron, material) << " cm^-1" << G4endl;
+    std::ofstream outputStream("output1.txt");
+
+    outputStream << std::setprecision(17);
+
+
+    std::vector<G4double> energies = {10.*keV, 20.*keV, 10.*keV, 20.*keV, 80.*eV, 2.*MeV};
+
+    for (auto e : energies) {
+        dynamicNeutron->SetKineticEnergy(e);
+        outputStream << e << " " << cm*elasticDataStore->GetCrossSection(dynamicNeutron, material) << G4endl;
+    }
+
+    outputStream.close();   
 
 
     delete runManager;
