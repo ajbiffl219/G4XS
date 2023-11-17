@@ -13,6 +13,7 @@
 #include "G4ProcessVector.hh"
 
 #include "G4ThreeVector.hh"
+#include "G4SystemOfUnits.hh"
 
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
@@ -24,6 +25,10 @@
 #include "G4ParticleHPFissionData.hh"
 #include "G4ParticleHPInelasticData.hh"
 
+#include "G4ParticleHPElastic.hh"
+#include "G4ParticleHPInelastic.hh"
+#include "G4ParticleHPFission.hh"
+#include "G4ParticleHPCapture.hh"
 //#include "G4ParticleHPBGGNucleonInelasticXS.hh"
 //#include "G4ParticleHPJENDLHEInelasticData.hh"
 //#include "G4NeutronBuilder.hh"
@@ -61,6 +66,11 @@ void NeutronPhysicsList::ConstructHadronics() {
     static_cast<G4HadronicProcess*>((*procs)[2])->AddDataSet(new G4ParticleHPInelasticData);
     static_cast<G4HadronicProcess*>((*procs)[3])->AddDataSet(new G4ParticleHPCaptureData);
     static_cast<G4HadronicProcess*>((*procs)[4])->AddDataSet(new G4ParticleHPFissionData);
+
+    static_cast<G4HadronicProcess*>((*procs)[1])->RegisterMe(new G4ParticleHPElastic);
+    static_cast<G4HadronicProcess*>((*procs)[2])->RegisterMe(new G4ParticleHPInelastic);
+    static_cast<G4HadronicProcess*>((*procs)[3])->RegisterMe(new G4ParticleHPCapture);
+    static_cast<G4HadronicProcess*>((*procs)[4])->RegisterMe(new G4ParticleHPFission);
 
     //G4cout << "NeutronPhysicsList::ConstructHadronics()" << G4endl;
 }
