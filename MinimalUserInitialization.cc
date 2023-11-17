@@ -79,10 +79,10 @@ void NeutronPhysicsList::ConstructParticle() {
 }
 
 
-MinimalDetector::MinimalDetector() : G4VUserDetectorConstruction() {;}
+MinimalDetector::MinimalDetector(G4String mat) : G4VUserDetectorConstruction(), material(mat) {;}
 
 G4VPhysicalVolume* MinimalDetector::Construct() {
-    G4Material *galactic = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
+    G4Material *galactic = G4NistManager::Instance()->FindOrBuildMaterial(material);
     G4Box *worldBox = new G4Box("WorldBox", 1.,1.,1.);
     return new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), new G4LogicalVolume(worldBox, galactic, "World"), "World", nullptr, false, 0, false);
 }

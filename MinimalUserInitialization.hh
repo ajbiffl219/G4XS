@@ -19,9 +19,11 @@ public:
 
 class MinimalDetector : public G4VUserDetectorConstruction {
 public:
-    MinimalDetector();
+    MinimalDetector(G4String mat = "G4_Galactic");
     ~MinimalDetector() {;}
     G4VPhysicalVolume* Construct();
+protected:
+    G4String material;
 };
 
 
