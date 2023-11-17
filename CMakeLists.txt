@@ -46,9 +46,11 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # ============================================
 # add executables
 add_executable(G4totals G4totals.cc MinimalUserInitialization.cc)
-#add_executable(G4diffs G4diffs.cc)
+add_executable(G4diffs G4diffs.cc MinimalUserInitialization.cc)
 
 target_include_directories(G4totals PUBLIC "${CMAKE_SOURCE_DIR}")
+target_include_directories(G4diffs PUBLIC "${CMAKE_SOURCE_DIR}")
 
 target_link_libraries(G4totals PUBLIC "${Geant4_LIBRARIES}")
+target_link_libraries(G4diffs PUBLIC "${Geant4_LIBRARIES}")
 
