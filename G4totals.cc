@@ -13,10 +13,7 @@
 #include "MinimalUserInitialization.hh"
 
 
-#include "globals.hh"
 #include "G4HadronElasticProcess.hh"
-#include "G4ParticleHPElasticData.hh"
-#include "G4ParticleHPElastic.hh"
 #include "G4Neutron.hh"
 #include "G4ProcessManager.hh"
 
@@ -24,10 +21,6 @@
 #include "G4ThreeVector.hh"
 
 #include "G4Material.hh"
-
-#include "G4Box.hh"
-#include "G4PVPlacement.hh"
-
 #include "G4CrossSectionDataStore.hh"
 
 
