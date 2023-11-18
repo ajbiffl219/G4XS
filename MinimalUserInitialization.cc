@@ -13,7 +13,6 @@
 #include "G4ProcessVector.hh"
 
 #include "G4ThreeVector.hh"
-#include "G4SystemOfUnits.hh"
 
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
@@ -85,7 +84,8 @@ void NeutronPhysicsList::ConstructProcess() {
 
 
 void NeutronPhysicsList::ConstructParticle() {
-    G4Neutron::NeutronDefinition();
+    G4ParticleDefinition *theNeutron = G4Neutron::NeutronDefinition();
+    G4ParticleTable::GetParticleTable()->SetGenericIon(theNeutron);
 }
 
 
@@ -107,12 +107,24 @@ void MinimalInitialization::Build() const {
 }
 
 
-MinimalPrimaryGenerator::MinimalPrimaryGenerator() : G4VUserPrimaryGeneratorAction() {;}
+MinimalPrimaryGenerator::MinimalPrimaryGenerator(G4double energy) : G4VUserPrimaryGeneratorAction(), theEnergy(energy) {
+    particleGun = new G4ParticleGun(1);
+    particleGun->SetParticleDefinition(G4Neutron::Definition());
+    //particleGun->SetParticleEnergy();
+    particleGun->SetParticlePosition(G4ThreeVector(0.,0.,0.));
+    particleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
+}
+
+
+MinimalPrimaryGenerator::~MinimalPrimaryGenerator() {
+    delete particleGun;
+}
 
 
 
 void MinimalPrimaryGenerator::GeneratePrimaries(G4Event *anEvent) {
-    return;
+    particleGun->SetParticleEnergy(theEnergy);
+    particleGun->GeneratePrimaryVertex(anEvent);
 }
 
 
