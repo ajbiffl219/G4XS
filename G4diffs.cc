@@ -16,10 +16,14 @@
 #include "G4HadFinalState.hh"
 #include "G4Track.hh"
 
+#include "G4SystemOfUnits.hh"
+
 #include "G4ParticleHPManager.hh"
 
 
 int main(int argc, char **argv) {
+
+    CLHEP::HepRandom::setTheSeed(time(NULL));
 
 #ifdef G4MULTITHREADED  
     G4MTRunManager * runManager = new G4MTRunManager(); 
@@ -83,8 +87,9 @@ int main(int argc, char **argv) {
     G4cout << "created projectile" << G4endl;
     
     // get G4Nucleus
-    G4Nucleus *materialNucleus = new G4Nucleus(material);
+    G4Nucleus *materialNucleus = new G4Nucleus;
     G4CrossSectionDataStore *elasticDataStore = elasticProc->GetCrossSectionDataStore();
+    elasticDataStore->ComputeCrossSection(dynamicNeutron, material); // need to compute cross sections in material before sampling Z/A
     const G4Element *theElement = elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
     elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
     G4cout << "selected isotope" << G4endl;
