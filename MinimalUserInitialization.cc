@@ -85,7 +85,8 @@ void NeutronPhysicsList::ConstructProcess() {
 
 
 void NeutronPhysicsList::ConstructParticle() {
-    G4Neutron::NeutronDefinition();
+    G4ParticleDefinition *theNeutron = G4Neutron::NeutronDefinition();
+    G4ParticleTable::GetParticleTable()->SetGenericIon(theNeutron);
 }
 
 
