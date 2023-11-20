@@ -43,11 +43,9 @@ int main(int argc, char **argv) {
     G4cout << "sequential mode" << G4endl;
 #endif
 
-    G4String mat = "G4_Si";
-    G4double initialEnergy = 2.*MeV;
+    G4String mat;
     if (argc == 2) {
-        //mat = argv[1];
-        initialEnergy = std::stof(argv[1])*MeV;
+        mat = argv[1];
     } else {
         mat = "G4_Si";
     }
@@ -89,7 +87,7 @@ int main(int argc, char **argv) {
     G4Step *theStep = new G4Step();
     theStep->SetPreStepPoint(thePoint);
     
-    //G4double initialEnergy = 2.*MeV;
+    G4double initialEnergy = 2.*MeV;
 
     G4DynamicParticle *dynamicNeutron = new G4DynamicParticle(theNeutron, G4ThreeVector(0.,0.,1.), 0.);
     
@@ -106,9 +104,7 @@ int main(int argc, char **argv) {
     G4CrossSectionDataStore *elasticDataStore = elasticProc->GetCrossSectionDataStore();
     elasticDataStore->ComputeCrossSection(dynamicNeutron, material); // need to compute cross sections in material before sampling Z/A
     //const G4Element *theElement = elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
-    do {
-        elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
-    } while (materialNucleus->GetA_asInt() != 28);
+    elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
     G4cout << "selected isotope" << G4endl;
 
     
@@ -137,7 +133,7 @@ int main(int argc, char **argv) {
 
     //G4cout << neutronFS->GetEnergyChange() << G4endl; // from usage in G4HadronicProcess::FillResult(), GetEnergyChange() returns the final energy
     
-    G4String fileName = "finalEnergies_Si28_" + std::to_string(initialEnergy) + ".txt";
+    G4String fileName = "finalEnergies.txt";
     writeArray(fileName, finalEnergies, N);
     
 
