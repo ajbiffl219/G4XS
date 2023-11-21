@@ -15,6 +15,7 @@
 #include "G4HadProjectile.hh"
 #include "G4HadFinalState.hh"
 #include "G4Track.hh"
+#include "Randomize.hh"
 
 #include "G4SystemOfUnits.hh"
 
@@ -28,6 +29,12 @@ void writeArray(G4String fileName, G4double *data, G4int N) {
         os << i << " " << data[i] << G4endl;
     }
     os.close();
+}
+
+
+G4double reciprocalDistribution(G4double a, G4double b) {
+    // draw from 1/x distribution between a and b
+    return a*std::pow(b/a, G4UniformRand());
 }
 
 
@@ -114,27 +121,32 @@ int main(int argc, char **argv) {
     //    interactionList[i]->ModelDescription(G4cout);
     //}
 
-    G4cout << elasticInteraction->GetModelName() << G4endl;
-    elasticInteraction->SetVerboseLevel(10);
+    //G4cout << elasticInteraction->GetModelName() << G4endl;
+    //elasticInteraction->SetVerboseLevel(10);
 
     //auto thing = projectile->GetMaterial();
     //if (!thing) { G4cout << "there's your problem" << G4endl;}
 
-    const G4int N = 100000;
+    const G4int N = 20000;
     G4double finalEnergies[N];
     G4HadFinalState *neutronFS;
 
-    for (int i = 0; i <N; ++i) {
-        neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
-        finalEnergies[i] = neutronFS->GetEnergyChange();
+    
+
+    for (int i = 0; i < N; ++i) {
+        //neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
+        //finalEnergies[i] = neutronFS->GetEnergyChange();
+        finalEnergies[i] = reciprocalDistribution(0.05, 3);
     }
 
     //G4HadFinalState *neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
 
     //G4cout << neutronFS->GetEnergyChange() << G4endl; // from usage in G4HadronicProcess::FillResult(), GetEnergyChange() returns the final energy
     
-    G4String fileName = "finalEnergies.txt";
+    G4String fileName = "energyDraws.txt";
     writeArray(fileName, finalEnergies, N);
+
+    G4cout << "rng: " << G4UniformRand() << G4endl;
     
 
     delete runManager;
