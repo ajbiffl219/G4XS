@@ -66,20 +66,21 @@ int main() {
     //dynamicNeutron->SetKineticEnergy(50.*keV);
     //G4cout << "Cross section for 50 keV neutron with Si = " << cm*elasticDataStore->GetCrossSection(dynamicNeutron, material) << " cm^-1" << G4endl;
 
-    std::ofstream outputStream("output_all.txt");
+    std::ofstream outputStream("output1.txt");
 
     outputStream << std::setprecision(17);
 
 
     //std::vector<G4double> energies = {10.*keV, 20.*keV, 10.*keV, 20.*keV, 80.*eV, 2.*MeV};
-    G4double Emin = 1e-5*eV, Emax = 20.*MeV, e = Emin;
-    G4int npoints = 50000;
-    G4double de = std::pow(Emax/Emin, 1./npoints);
+    //G4double Emin = 1e-5*eV, Emax = 20.*MeV, e = Emin;
+    G4double Emin = 0.5*keV, Emax = 1.15*keV, e;
+    G4int npoints = 2000;
+    //G4double de = std::pow(Emax/Emin, 1./npoints);
 
 
     for (G4int i = 0; i < npoints; ++i) {
-        //e = Emin + i*(Emax - Emin)/npoints;
-        e *= de;
+        e = Emin + i*(Emax - Emin)/npoints;
+        //e *= de;
         dynamicNeutron->SetKineticEnergy(e);
         outputStream << e/eV;
         for (G4int j = 0; j < 3; ++j) {
