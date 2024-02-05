@@ -22,19 +22,13 @@
 #include "G4ParticleHPManager.hh"
 
 
-void writeArray(G4String fileName, G4double *data, G4int N) {
+void writeEnergies(G4String fileName, G4double *data, G4int N) {
     std::ofstream os(fileName);
     os << std::setprecision(17);
     for (int i = 0; i < N; ++i) {
-        os << i << " " << data[i] << G4endl;
+        os << i << " " << data[i]/eV << G4endl;
     }
     os.close();
-}
-
-
-G4double reciprocalDistribution(G4double a, G4double b) {
-    // draw from 1/x distribution between a and b
-    return a*std::pow(b/a, G4UniformRand());
 }
 
 
@@ -85,6 +79,9 @@ int main(int argc, char **argv) {
     //std::vector<G4HadronicInteraction*> interactionList = elasticProc->GetHadronicInteractionList();
     G4HadronicInteraction* elasticInteraction = elasticProc->GetHadronicInteractionList()[0];
 
+    
+    G4DynamicParticle *dynamicNeutron = new G4DynamicParticle(theNeutron, G4ThreeVector(0.,0.,1.), 0.);
+
     G4ThreeVector origin = G4ThreeVector(0.,0.,0.);
     
     G4StepPoint *thePoint = new G4StepPoint();
@@ -94,12 +91,7 @@ int main(int argc, char **argv) {
     G4Step *theStep = new G4Step();
     theStep->SetPreStepPoint(thePoint);
     
-    G4double initialEnergy = 2.*MeV;
-
-    G4DynamicParticle *dynamicNeutron = new G4DynamicParticle(theNeutron, G4ThreeVector(0.,0.,1.), 0.);
     
-    
-    dynamicNeutron->SetKineticEnergy(initialEnergy);
     G4Track *neutronTrack = new G4Track(dynamicNeutron, 0., origin);
     neutronTrack->SetStep(theStep);
 
@@ -108,11 +100,12 @@ int main(int argc, char **argv) {
     
     // get G4Nucleus
     G4Nucleus *materialNucleus = new G4Nucleus;
-    G4CrossSectionDataStore *elasticDataStore = elasticProc->GetCrossSectionDataStore();
-    elasticDataStore->ComputeCrossSection(dynamicNeutron, material); // need to compute cross sections in material before sampling Z/A
+    //G4CrossSectionDataStore *elasticDataStore = elasticProc->GetCrossSectionDataStore();
+    
+    //elasticDataStore->ComputeCrossSection(dynamicNeutron, material); // need to compute cross sections in material before sampling Z/A
     //const G4Element *theElement = elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
-    elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
-    G4cout << "selected isotope" << G4endl;
+    //elasticDataStore->SampleZandA(dynamicNeutron, material, *materialNucleus);
+    //G4cout << "selected isotope" << G4endl;
 
     
 
@@ -127,26 +120,44 @@ int main(int argc, char **argv) {
     //auto thing = projectile->GetMaterial();
     //if (!thing) { G4cout << "there's your problem" << G4endl;}
 
-    const G4int N = 20000;
-    G4double finalEnergies[N];
     G4HadFinalState *neutronFS;
 
-    
+    const G4int N = 500000;
+    G4double finalEnergies[N];
 
-    for (int i = 0; i < N; ++i) {
-        //neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
-        //finalEnergies[i] = neutronFS->GetEnergyChange();
-        finalEnergies[i] = reciprocalDistribution(0.05, 3);
+    G4double Emin = 1.*keV, Emax = 10.*keV;
+    G4int npoints = 10;
+
+    G4String fileName;
+
+    G4double initiale[] = {0.5*keV, 0.7*keV, 0.8*keV, 0.9*keV, 1.*keV, 1.1*keV, 1.15*keV};
+    
+    //for (G4int i = 0; i < npoints; ++i) {
+
+    for (G4double &e : initiale) {
+
+        //e = Emin + i*(Emax - Emin)/npoints;
+        
+        dynamicNeutron->SetKineticEnergy(e);
+        neutronTrack->SetKineticEnergy(e);
+        projectile->Initialise(*neutronTrack);
+
+        for (G4int j = 0; j < N; ++j) {
+            neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
+            finalEnergies[j] = neutronFS->GetEnergyChange();
+        }
+        fileName = "finalE" + std::to_string(e) + ".txt";
+        G4cout << "Writing data to " << fileName << G4endl;
+        writeEnergies(fileName, finalEnergies, N);
     }
 
     //G4HadFinalState *neutronFS = elasticInteraction->ApplyYourself(*projectile, *materialNucleus);
 
     //G4cout << neutronFS->GetEnergyChange() << G4endl; // from usage in G4HadronicProcess::FillResult(), GetEnergyChange() returns the final energy
     
-    G4String fileName = "energyDraws.txt";
-    writeArray(fileName, finalEnergies, N);
+    
 
-    G4cout << "rng: " << G4UniformRand() << G4endl;
+    //G4cout << "rng: " << G4UniformRand() << G4endl;
     
 
     delete runManager;
